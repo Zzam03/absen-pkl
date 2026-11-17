@@ -1,18 +1,7 @@
 <?php
-
 namespace App\Models;
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
-class Schedule extends Model
-{
-    use HasFactory;
-
+class Schedule extends Model {
     protected $guarded = ['id'];
-
-    public function placement()
-    {
-        return $this->belongsTo(Placement::class);
-    }
+    public function placement() { return $this->belongsTo(Placement::class); }
 }
