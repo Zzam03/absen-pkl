@@ -1,154 +1,144 @@
-
-@extends('layouts.main')
-
-@section('title', 'Absensi')
+@extends('layouts.app')
 
 @section('content')
-<div class="container-fluid">
-    <div class="mb-4">
-        <h3 class="fw-bold">Absensi PKL</h3>
-        <p class="text-muted">Catat kehadiran dan kepulangan kamu di lokasi PKL.</p>
+<div x-data="attendanceApp()" x-init="initCamera(); initLocation()" class="p-4 max-w-md mx-auto" data-aos="fade-up">
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold mb-1 text-gray-800">Absensi PKL</h2>
+        <p class="text-gray-500 text-sm">Pastikan wajah Anda terlihat jelas dan GPS aktif.</p>
     </div>
 
-    @if (!$placement)
-        <div class="alert alert-warning">
-            Kamu tidak memiliki penempatan PKL yang aktif hari ini.
+    <!-- Kamera Tampilan -->
+    <div class="relative rounded-2xl overflow-hidden shadow-xl bg-black aspect-square mb-6 border-4 border-white">
+        <video x-ref="video" autoplay playsinline class="w-full h-full object-cover"></video>
+        <canvas x-ref="canvas" class="hidden"></canvas>
+        
+        <!-- Overlay Garis Panduan -->
+        <div class="absolute inset-0 border-[40px] border-black/30 rounded-full pointer-events-none"></div>
+
+        <div class="absolute bottom-4 left-0 right-0 flex justify-center">
+            <button @click="takeSnapshot()" class="w-16 h-16 bg-white rounded-full border-4 border-gray-300 active:scale-90 transition-transform shadow-lg flex items-center justify-center">
+                <div class="w-12 h-12 bg-blue-600 rounded-full"></div>
+            </button>
         </div>
-    @else
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-body">
-                <h5 class="fw-bold">{{ $placement->location->name }}</h5>
-                <p class="text-muted mb-1">{{ $placement->location->address }}</p>
-                <small class="text-muted">
-                    Radius lokasi: {{ $placement->location->radius_meter }} meter
-                </small>
-            </div>
+    </div>
+
+    <!-- Info Lokasi -->
+    <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 mb-6 flex items-start space-x-3 shadow-sm">
+        <svg class="w-6 h-6 text-blue-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+        <div class="flex-1">
+            <p class="font-semibold text-blue-900 text-sm">Lokasi Anda Saat Ini:</p>
+            <p class="text-xs text-blue-700 mt-1" x-text="locationStatus">Mengambil lokasi...</p>
         </div>
+    </div>
 
-        @if ($attendance && in_array($attendance->status, ['izin', 'sakit']))
-            <div class="alert alert-info">
-                Absensi hari ini tercatat sebagai
-                <strong>{{ ucfirst($attendance->status) }}</strong>.
-                <br>
-                Keterangan: {{ $attendance->note }}
-            </div>
-
-        @elseif ($attendance && $attendance->check_out_time)
-            <div class="alert alert-success">
-                <h5 class="fw-bold mb-1">Absensi selesai!</h5>
-                Kamu sudah melakukan absen masuk dan pulang hari ini.
-            </div>
-
-        @else
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-4">
-                    <h5 class="fw-bold mb-3">Status Kehadiran Hari Ini</h5>
-
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-6">
-                            <div class="p-3 rounded bg-light">
-                                <small class="text-muted">Absen Masuk</small>
-                                <h5 class="mb-0">
-                                    {{ $attendance?->check_in_time ?? 'Belum absen' }}
-                                </h5>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="p-3 rounded bg-light">
-                                <small class="text-muted">Absen Pulang</small>
-                                <h5 class="mb-0">
-                                    {{ $attendance?->check_out_time ?? 'Belum absen' }}
-                                </h5>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="alert alert-secondary">
-                        <i class="bi bi-geo-alt"></i>
-                        Tekan tombol Ambil Lokasi sebelum melakukan absensi.
-                    </div>
-
-                    <button type="button" class="btn btn-outline-primary mb-4" id="btnLokasi">
-                        <i class="bi bi-geo-alt"></i> Ambil Lokasi Saya
-                    </button>
-
-                    <p id="statusLokasi" class="small text-muted">
-                        Lokasi belum diambil.
-                    </p>
-
-                    @if (!$attendance || !$attendance->check_in_time)
-                        <form action="{{ route('student.absen.masuk') }}" method="POST" enctype="multipart/form-data">
-                            @csrf
-                            <input type="hidden" name="latitude" class="latitude">
-                            <input type="hidden" name="longitude" class="longitude">
-
-                            <div class="mb-3">
-                                <label class="form-label">Foto Absensi (Opsional)</label>
-                                <input type="file" name="photo" class="form-control" accept="image/*" capture="environment">
-                            </div>
-
-                            <button type="submit" class="btn btn-success">
-                                <i class="bi bi-box-arrow-in-right"></i> Absen Masuk
-                            </button>
-                        </form>
-                    @else
-                        <form action="{{ route('student.absen.pulang') }}" method="POST" enctype="multipart/form-data">
-                            @csrf
-                            <input type="hidden" name="latitude" class="latitude">
-                            <input type="hidden" name="longitude" class="longitude">
-
-                            <div class="mb-3">
-                                <label class="form-label">Foto Pulang (Opsional)</label>
-                                <input type="file" name="photo" class="form-control" accept="image/*" capture="environment">
-                            </div>
-
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-box-arrow-right"></i> Absen Pulang
-                            </button>
-                        </form>
-                    @endif
-                </div>
-            </div>
-        @endif
-    @endif
+    <!-- Tombol Absen -->
+    <button @click="submitAttendance()" :disabled="!photoTaken || !locationReady" 
+            class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 disabled:opacity-50 transition-all transform hover:-translate-y-1 flex justify-center items-center space-x-2">
+        <svg x-show="!photoTaken || !locationReady" class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+        <span x-text="(!photoTaken || !locationReady) ? 'Menunggu Kamera & GPS...' : 'Absen Masuk Sekarang'"></span>
+    </button>
 </div>
-@endsection
 
-@push('scripts')
 <script>
-document.getElementById('btnLokasi')?.addEventListener('click', function () {
-    const tombol = this;
-    const status = document.getElementById('statusLokasi');
+function attendanceApp() {
+    return {
+        stream: null, 
+        photoTaken: false, 
+        photoData: null, 
+        locationReady: false,
+        lat: null, 
+        lng: null, 
+        locationStatus: 'Mengambil lokasi...',
 
-    if (!navigator.geolocation) {
-        status.textContent = 'Browser kamu tidak mendukung fitur lokasi.';
-        return;
-    }
-
-    tombol.disabled = true;
-    status.textContent = 'Sedang mengambil lokasi...';
-
-    navigator.geolocation.getCurrentPosition(
-        function (position) {
-            const latitude = position.coords.latitude;
-            const longitude = position.coords.longitude;
-
-            document.querySelectorAll('.latitude').forEach(el => el.value = latitude);
-            document.querySelectorAll('.longitude').forEach(el => el.value = longitude);
-
-            status.textContent = 'Lokasi berhasil diambil. Kamu bisa melakukan absensi.';
-            tombol.disabled = false;
+        async initCamera() {
+            try {
+                this.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+                this.$refs.video.srcObject = this.stream;
+            } catch (err) { 
+                alert("Kamera gagal diakses. Pastikan Anda memberi izin browser."); 
+            }
         },
-        function (error) {
-            status.textContent = 'Gagal mengambil lokasi. Pastikan izin lokasi di browser sudah diaktifkan.';
-            tombol.disabled = false;
+
+        initLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        this.lat = position.coords.latitude;
+                        this.lng = position.coords.longitude;
+                        this.locationReady = true;
+                        this.locationStatus = `Terkunci: ${this.lat.toFixed(5)}, ${this.lng.toFixed(5)}`;
+                    },
+                    (error) => { 
+                        this.locationStatus = 'Gagal mengambil lokasi. Izinkan akses GPS.'; 
+                    },
+                    { enableHighAccuracy: true, timeout: 10000 }
+                );
+            } else {
+                this.locationStatus = 'Browser Anda tidak mendukung Geolocation.';
+            }
         },
-        {
-            enableHighAccuracy: true,
-            timeout: 15000,
-            maximumAge: 0
+
+        takeSnapshot() {
+            const video = this.$refs.video; 
+            const canvas = this.$refs.canvas;
+            canvas.width = video.videoWidth; 
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            this.photoData = canvas.toDataURL('image/jpeg', 0.8);
+            this.photoTaken = true;
+        },
+
+        async submitAttendance() {
+            if(!this.photoTaken || !this.locationReady) return;
+            
+            // Tampilkan loading
+            Swal.fire({
+                title: 'Memproses Absensi...',
+                text: 'Mohon tunggu sebentar',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading() }
+            });
+
+            try {
+                const response = await fetch('/api/attendance', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json', 
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}' 
+                    },
+                    body: JSON.stringify({ 
+                        latitude: this.lat, 
+                        longitude: this.lng, 
+                        photo: this.photoData 
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if(response.ok) { 
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Absensi Berhasil!',
+                        text: result.message,
+                        confirmButtonColor: '#3b82f6'
+                    }).then(() => { window.location.reload(); });
+                } else { 
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Absensi Gagal',
+                        text: result.message,
+                        confirmButtonColor: '#ef4444'
+                    });
+                }
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error Sistem',
+                    text: 'Terjadi kesalahan jaringan, coba lagi.',
+                });
+            }
         }
-    );
-});
+    }
+}
 </script>
-@endpush
+@endsection
