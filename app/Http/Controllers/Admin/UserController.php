@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use Illuminate\Http\Request;
+use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 
@@ -70,7 +70,6 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
-        // Akun Admin tidak boleh diedit melalui menu ini
         abort_if($user->role === 'admin', 403);
 
         return view('admin.users.edit', compact('user'));
@@ -78,7 +77,6 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
-        // Lindungi akun Admin
         abort_if($user->role === 'admin', 403);
 
         $data = $request->validate([
@@ -110,10 +108,8 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
-        // Lindungi akun Admin
         abort_if($user->role === 'admin', 403);
 
-        // Cek apakah pengguna memiliki data penempatan
         if (
             $user->placements()->exists() ||
             $user->supervisedPlacements()->exists()
@@ -124,7 +120,6 @@ class UserController extends Controller
             );
         }
 
-        // Lindungi riwayat absensi
         if ($user->attendances()->exists()) {
             return back()->with(
                 'error',
@@ -132,7 +127,6 @@ class UserController extends Controller
             );
         }
 
-        // Lindungi riwayat jurnal
         if ($user->journals()->exists()) {
             return back()->with(
                 'error',
@@ -140,7 +134,6 @@ class UserController extends Controller
             );
         }
 
-        // Hapus pengguna jika tidak memiliki data terkait
         $user->delete();
 
         return redirect()

@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Location;
-use App\Models\Placement;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use App\Models\Placement;
+use App\Models\User;
+use App\Models\Location;
 
 class PlacementController extends Controller
 {
@@ -41,12 +41,10 @@ class PlacementController extends Controller
                 ->where('is_active', true)
                 ->orderBy('name')
                 ->get(),
-
             'pembimbings' => User::where('role', 'pembimbing_kantor')
                 ->where('is_active', true)
                 ->orderBy('name')
                 ->get(),
-
             'locations' => Location::orderBy('name')->get(),
         ];
     }
@@ -54,10 +52,7 @@ class PlacementController extends Controller
     public function index()
     {
         $placements = Placement::with([
-            'student',
-            'pembimbing',
-            'location',
-            'score',
+            'student', 'pembimbing', 'location', 'score',
         ])
             ->where('status', 'active')
             ->orderByDesc('start_date')
@@ -80,15 +75,13 @@ class PlacementController extends Controller
             ->exists();
 
         if ($sudahAktif) {
-            return back()
-                ->withInput()
+            return back()->withInput()
                 ->with('error', 'Siswa ini sudah memiliki penempatan aktif.');
         }
 
         Placement::create($data + ['status' => 'active']);
 
-        return redirect()
-            ->route('admin.placements.index')
+        return redirect()->route('admin.placements.index')
             ->with('success', 'Penempatan berhasil dibuat!');
     }
 
@@ -111,15 +104,13 @@ class PlacementController extends Controller
                 ->exists();
 
         if ($bentrok) {
-            return back()
-                ->withInput()
+            return back()->withInput()
                 ->with('error', 'Siswa ini sudah memiliki penempatan aktif lain.');
         }
 
         $placement->update($data);
 
-        return redirect()
-            ->route('admin.placements.index')
+        return redirect()->route('admin.placements.index')
             ->with('success', 'Penempatan berhasil diperbarui!');
     }
 
@@ -137,8 +128,7 @@ class PlacementController extends Controller
 
         $placement->delete();
 
-        return redirect()
-            ->route('admin.placements.index')
+        return redirect()->route('admin.placements.index')
             ->with('success', 'Penempatan berhasil dihapus!');
     }
 }
