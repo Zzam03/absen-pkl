@@ -2,6 +2,7 @@
 @extends('layouts.main')
 
 @section('title', 'Rekap Jurnal')
+@section('page-heading', 'Rekap Jurnal')
 
 @section('content')
 <div class="container-fluid py-3">

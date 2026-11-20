@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Student;
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use App\Models\Placement;
+use App\Models\Schedule;
 use Illuminate\Http\Request;
 
 class AbsenController extends Controller
@@ -19,6 +20,15 @@ class AbsenController extends Controller
             ->whereDate('end_date', '>=', today())
             ->latest('start_date')
             ->first();
+    }
+
+    // Mengecek apakah jadwal PKL hari ini libur
+    private function jadwalHariIniLibur($placement)
+    {
+        return Schedule::where('placement_id', $placement->id)
+            ->whereDate('date', today())
+            ->where('status', 'libur')
+            ->exists();
     }
 
     // Menghitung jarak antara GPS siswa dan lokasi PKL
@@ -64,10 +74,14 @@ class AbsenController extends Controller
             return back()->with('error', 'Kamu tidak memiliki penempatan PKL yang aktif hari ini.');
         }
 
+        if ($this->jadwalHariIniLibur($placement)) {
+            return back()->with('error', 'Hari ini merupakan jadwal libur PKL. Kamu tidak perlu melakukan absensi.');
+        }
+
         $data = $request->validate([
             'latitude'  => 'required|numeric|between:-90,90',
             'longitude' => 'required|numeric|between:-180,180',
-            'photo'     => 'nullable|image|max:4096',
+            'photo'     => 'required|image|max:4096',
         ]);
 
         $attendance = Attendance::where('student_id', auth()->id())
@@ -130,10 +144,14 @@ class AbsenController extends Controller
             return back()->with('error', 'Kamu tidak memiliki penempatan PKL yang aktif hari ini.');
         }
 
+        if ($this->jadwalHariIniLibur($placement)) {
+            return back()->with('error', 'Hari ini merupakan jadwal libur PKL. Kamu tidak perlu melakukan absensi.');
+        }
+
         $data = $request->validate([
             'latitude'  => 'required|numeric|between:-90,90',
             'longitude' => 'required|numeric|between:-180,180',
-            'photo'     => 'nullable|image|max:4096',
+            'photo'     => 'required|image|max:4096',
         ]);
 
         $attendance = Attendance::where('student_id', auth()->id())
@@ -218,6 +236,10 @@ class AbsenController extends Controller
             return back()->with('error', 'Kamu tidak memiliki penempatan PKL yang aktif hari ini.');
         }
 
+        if ($this->jadwalHariIniLibur($placement)) {
+            return back()->with('error', 'Hari ini merupakan jadwal libur PKL. Kamu tidak perlu mengajukan izin atau sakit.');
+        }
+
         $data = $request->validate([
             'status' => 'required|in:izin,sakit',
             'note'   => 'required|string|min:5|max:1000',
@@ -232,11 +254,11 @@ class AbsenController extends Controller
         }
 
         Attendance::create([
-            'student_id'  => auth()->id(),
+            'student_id'   => auth()->id(),
             'placement_id' => $placement->id,
-            'date'        => today(),
-            'status'      => $data['status'],
-            'note'        => $data['note'],
+            'date'         => today(),
+            'status'       => $data['status'],
+            'note'         => $data['note'],
         ]);
 
         return redirect()->route('student.riwayat')

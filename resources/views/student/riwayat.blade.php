@@ -2,6 +2,7 @@
 @extends('layouts.main')
 
 @section('title', 'Riwayat Absensi')
+@section('page-heading', 'Riwayat Absensi')
 
 @section('content')
 <div class="container-fluid">

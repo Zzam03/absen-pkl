@@ -11,15 +11,49 @@ class Placement extends Model
 
     protected $guarded = ['id'];
 
-    // Relasi yang sudah ada (sesuaikan jika ada perbedaan)
-    public function student() { return $this->belongsTo(User::class, 'student_id'); }
-    public function mentor() { return $this->belongsTo(User::class, 'pembimbing_id'); }
-    public function location() { return $this->belongsTo(Location::class); }
-    public function attendances() { return $this->hasMany(Attendance::class); }
+    protected $casts = [
+        'start_date' => 'date',
+        'end_date' => 'date',
+    ];
 
-    // Relasi Baru
-    public function schedules() 
-    { 
-        return $this->hasMany(Schedule::class); 
+    public function student()
+    {
+        return $this->belongsTo(User::class, 'student_id');
+    }
+
+    public function mentor()
+    {
+        return $this->belongsTo(User::class, 'pembimbing_id');
+    }
+
+    public function pembimbing()
+    {
+        return $this->belongsTo(User::class, 'pembimbing_id');
+    }
+
+
+    public function location()
+    {
+        return $this->belongsTo(Location::class);
+    }
+
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
+    }
+
+    public function journals()
+    {
+        return $this->hasMany(Journal::class);
+    }
+
+    public function score()
+    {
+        return $this->hasOne(Score::class);
+    }
+
+    public function schedules()
+    {
+        return $this->hasMany(Schedule::class);
     }
 }

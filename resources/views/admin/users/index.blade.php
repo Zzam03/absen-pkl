@@ -1,7 +1,26 @@
 
 @extends('layouts.main')
 
+@section('title', 'Data Pengguna')
+@section('page-heading', 'Data Pengguna')
+
 @section('content')
+
+<style>
+    .user-role-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 7px 10px;
+        border-radius: 8px;
+        background-color: #eff6ff;
+        color: #1d4ed8;
+        border: 1px solid #dbeafe;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+</style>
 
 <div class="container-fluid px-2 px-md-3">
 
@@ -63,11 +82,17 @@
                         </label>
                         <select name="role" class="form-select bg-light">
                             <option value="">Semua Pengguna</option>
-                            <option value="student" @selected(request('role') === 'student')>
-                                Siswa
+                            <option value="admin" @selected(request('role') === 'admin')>
+                                Admin
                             </option>
-                            <option value="pembimbing" @selected(request('role') === 'pembimbing')>
-                                Pembimbing
+                            <option value="student" @selected(request('role') === 'student')>
+                                Siswa PKL
+                            </option>
+                            <option value="pembimbing_kantor" @selected(request('role') === 'pembimbing_kantor')>
+                                Pembimbing Kantor
+                            </option>
+                            <option value="pembimbing_sekolah" @selected(request('role') === 'pembimbing_sekolah')>
+                                Pembimbing Sekolah
                             </option>
                         </select>
                     </div>
@@ -101,7 +126,7 @@
                         <tr>
                             <th class="py-3">Pengguna</th>
                             <th>Email</th>
-                            <th>Role</th>
+                            <th style="width: 190px;">Role</th>
                             <th>Status</th>
                             <th class="text-end">Aksi</th>
                         </tr>
@@ -129,16 +154,19 @@
 
                                 <td>{{ $user->email }}</td>
 
-                                <td>
-                                    @if($user->role === 'student')
-                                        <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary px-3 py-2">
-                                            Siswa
-                                        </span>
-                                    @else
-                                        <span class="badge rounded-pill bg-info bg-opacity-10 text-info px-3 py-2">
-                                            Pembimbing
-                                        </span>
-                                    @endif
+                                <td style="width: 190px;">
+                                    @php
+                                        $roleLabels = [
+                                            'admin' => 'Admin',
+                                            'student' => 'Siswa PKL',
+                                            'pembimbing_kantor' => 'Pembimbing Kantor',
+                                            'pembimbing_sekolah' => 'Pembimbing Sekolah',
+                                        ];
+                                    @endphp
+
+                                    <span class="user-role-badge">
+                                        {{ $roleLabels[$user->role] ?? ucfirst($user->role) }}
+                                    </span>
                                 </td>
 
                                 <td>
@@ -154,25 +182,31 @@
                                 </td>
 
                                 <td class="text-end">
-                                    <a href="{{ route('admin.users.edit', $user) }}"
-                                       class="btn btn-sm btn-light border rounded-3"
-                                       title="Edit pengguna">
-                                        <i class="bi bi-pencil-square text-primary"></i>
-                                    </a>
+                                    @if($user->role !== 'admin')
+                                        <a href="{{ route('admin.users.edit', $user) }}"
+                                           class="btn btn-sm btn-light border rounded-3"
+                                           title="Edit pengguna">
+                                            <i class="bi bi-pencil-square text-primary"></i>
+                                        </a>
 
-                                    <form action="{{ route('admin.users.destroy', $user) }}"
-                                          method="POST"
-                                          class="d-inline"
-                                          onsubmit="return confirm('Yakin ingin menghapus pengguna ini?')">
-                                        @csrf
-                                        @method('DELETE')
+                                        <form action="{{ route('admin.users.destroy', $user) }}"
+                                              method="POST"
+                                              class="d-inline"
+                                              onsubmit="return confirm('Yakin ingin menghapus pengguna {{ $user->name }}? Data yang sudah terhubung dengan penempatan tidak dapat dihapus.')">
+                                            @csrf
+                                            @method('DELETE')
 
-                                        <button type="submit"
-                                                class="btn btn-sm btn-light border rounded-3"
-                                                title="Hapus pengguna">
-                                            <i class="bi bi-trash text-danger"></i>
-                                        </button>
-                                    </form>
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-light border rounded-3"
+                                                    title="Hapus pengguna">
+                                                <i class="bi bi-trash text-danger"></i>
+                                            </button>
+                                        </form>
+                                    @else
+                                        <span class="text-muted small">
+                                            Akun dilindungi
+                                        </span>
+                                    @endif
                                 </td>
                             </tr>
                         @empty

@@ -2,6 +2,7 @@
 @extends('layouts.main')
 
 @section('title', 'Pengajuan Izin / Sakit')
+@section('page-heading', 'Izin / Sakit')
 
 @section('content')
 <div class="container-fluid">

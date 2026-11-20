@@ -540,3 +540,379 @@ button,
     }
 }
 }
+/* ========================================
+   PKL CONNECT - DESIGN SYSTEM
+   ======================================== */
+
+:root {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --primary-light: #eff6ff;
+
+    --sidebar: #101d36;
+    --sidebar-hover: #263b5c;
+    --sidebar-text: #e2eaf5;
+    --sidebar-muted: #bdcbe0;
+
+    --background: #f1f5f9;
+    --surface: #ffffff;
+    --text: #172033;
+    --muted: #64748b;
+    --border: #dce4ef;
+
+    --success: #15803d;
+    --warning: #b45309;
+    --danger: #dc2626;
+}
+
+/* LATAR DAN TEKS */
+body {
+    background: var(--background);
+    color: var(--text);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #172554;
+    font-weight: 700;
+}
+
+p {
+    color: #475569;
+}
+
+/* SIDEBAR */
+.sidebar {
+    background: var(--sidebar);
+    color: #ffffff;
+    border-right: 1px solid #263752;
+}
+
+.sidebar-brand {
+    border-bottom-color: rgba(255,255,255,.14);
+}
+
+.sidebar-brand h5 {
+    color: #ffffff;
+}
+
+.sidebar-brand small {
+    color: var(--sidebar-muted);
+}
+
+.brand-icon {
+    background: #2563eb;
+    box-shadow: 0 4px 12px rgba(37,99,235,.35);
+}
+
+.sidebar-user {
+    background: #1b2d49;
+    border: 1px solid #344866;
+}
+
+.user-info strong {
+    color: #ffffff;
+}
+
+.user-info small {
+    color: #d0dced;
+}
+
+.menu-label {
+    color: #bdcbe0;
+}
+
+.menu-link {
+    color: var(--sidebar-text);
+    font-weight: 600;
+}
+
+.menu-link i {
+    color: #c6d6eb;
+}
+
+.menu-link:hover {
+    color: #ffffff;
+    background: var(--sidebar-hover);
+}
+
+.menu-link:hover i {
+    color: #ffffff;
+}
+
+.menu-link.active {
+    color: #ffffff;
+    background: #2563eb;
+    box-shadow: 0 4px 12px rgba(37,99,235,.35);
+}
+
+.menu-link.active i {
+    color: #ffffff;
+}
+
+.sidebar-bottom {
+    border-top-color: rgba(255,255,255,.16);
+}
+
+.sidebar-bottom-info {
+    color: #d0dced;
+}
+
+/* TOPBAR */
+.topbar {
+    background: #ffffff;
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 2px 8px rgba(15,23,42,.035);
+}
+
+.topbar-title {
+    color: #172554;
+    font-weight: 800;
+}
+
+.topbar-subtitle {
+    color: #64748b;
+}
+
+.topbar-date {
+    color: #475569;
+}
+
+.profile-text strong {
+    color: #172033;
+}
+
+.profile-text small {
+    color: #64748b;
+}
+
+/* KONTEN DAN KARTU */
+.page-content {
+    color: var(--text);
+}
+
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 3px 12px rgba(15,23,42,.045);
+}
+
+.card-header {
+    color: #172554;
+    background: #ffffff;
+    border-bottom: 1px solid var(--border);
+}
+
+/* TOMBOL */
+.btn-primary {
+    color: #ffffff;
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    color: #ffffff;
+    background: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+.btn-outline-primary {
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-outline-primary:hover {
+    color: #ffffff;
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+/* FORM */
+.form-label {
+    color: #334155;
+    font-weight: 600;
+}
+
+.form-control,
+.form-select {
+    color: #172033;
+    border-color: #cbd5e1;
+    background-color: #ffffff;
+}
+
+.form-control::placeholder {
+    color: #8492a6;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(37,99,235,.14);
+}
+
+/* TABEL */
+.table {
+    color: #334155;
+}
+
+.table thead th {
+    color: #334155;
+    background: #edf2f8;
+    border-bottom-color: #dce4ef;
+    font-weight: 700;
+}
+
+.table tbody td {
+    color: #334155;
+    border-color: #e8edf4;
+}
+
+.table tbody tr:hover > * {
+    background: #f5f8ff;
+}
+
+/* LINK DAN TEKS PENDUKUNG */
+a {
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+}
+
+.text-muted,
+small.text-muted {
+    color: #64748b !important;
+}
+
+/* STATUS */
+.badge.bg-success,
+.badge.text-bg-success {
+    color: #166534 !important;
+    background: #dcfce7 !important;
+}
+
+.badge.bg-warning,
+.badge.text-bg-warning {
+    color: #92400e !important;
+    background: #fef3c7 !important;
+}
+
+.badge.bg-danger,
+.badge.text-bg-danger {
+    color: #991b1b !important;
+    background: #fee2e2 !important;
+}
+
+.badge.bg-primary,
+.badge.text-bg-primary {
+    color: #1e40af !important;
+    background: #dbeafe !important;
+}
+
+/* FOOTER */
+.app-footer {
+    color: #64748b;
+    background: #ffffff;
+    border-top-color: var(--border);
+}
+
+/* RESPONSIVE */
+@media (max-width: 575.98px) {
+    .sidebar {
+        width: 275px;
+    }
+
+    .topbar-title {
+        font-size: 14px;
+    }
+
+    .page-content {
+        padding: 16px 12px;
+    }
+
+    .card {
+        border-radius: 12px;
+    }
+}
+
+/* PKL CONNECT - SIDEBAR FINAL */
+.sidebar {
+    background: #101b33 !important;
+    color: #ffffff !important;
+    border-right: 1px solid #344563 !important;
+}
+
+.sidebar-brand {
+    background: #101b33 !important;
+    border-bottom: 1px solid #344563 !important;
+}
+
+.sidebar-brand h5 {
+    color: #ffffff !important;
+}
+
+.sidebar-brand small {
+    color: #c4d2e5 !important;
+}
+
+.brand-icon {
+    background: #2563eb !important;
+    color: #ffffff !important;
+}
+
+.sidebar-user {
+    background: #263752 !important;
+    border: 1px solid #405575 !important;
+}
+
+.user-info strong {
+    color: #ffffff !important;
+}
+
+.user-info small {
+    color: #d4dfed !important;
+}
+
+.menu-label {
+    color: #b9c9df !important;
+}
+
+.menu-link {
+    color: #e1eaf6 !important;
+    font-weight: 600 !important;
+}
+
+.menu-link i {
+    color: #c4d5eb !important;
+}
+
+.menu-link:hover {
+    background: #304765 !important;
+    color: #ffffff !important;
+}
+
+.menu-link:hover i {
+    color: #ffffff !important;
+}
+
+.menu-link.active {
+    background: #2563eb !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(37,99,235,.35) !important;
+}
+
+.menu-link.active i {
+    color: #ffffff !important;
+}
+
+.sidebar-bottom {
+    background: #101b33 !important;
+    border-top: 1px solid #344563 !important;
+}
+
+.sidebar-bottom-info {
+    color: #d4dfed !important;
+}
+
+.sidebar-bottom-info i {
+    color: #60a5fa !important;
+}

@@ -1,8 +1,10 @@
 
 @extends('layouts.main')
 
-@section('content')
+@section('title', 'Tambah Pengguna')
+@section('page-heading', 'Tambah Pengguna')
 
+@section('content')
 <div class="container-fluid px-2 px-md-3">
 
     <div class="mb-4">
@@ -75,13 +77,20 @@
                                 class="form-select @error('role') is-invalid @enderror"
                                 required>
                             <option value="">Pilih role</option>
+
                             <option value="student" @selected(old('role') === 'student')>
-                                Siswa
+                                Siswa PKL
                             </option>
-                            <option value="pembimbing" @selected(old('role') === 'pembimbing')>
-                                Pembimbing
+
+                            <option value="pembimbing_kantor" @selected(old('role') === 'pembimbing_kantor')>
+                                Pembimbing Kantor
+                            </option>
+
+                            <option value="pembimbing_sekolah" @selected(old('role') === 'pembimbing_sekolah')>
+                                Pembimbing Sekolah
                             </option>
                         </select>
+
                         @error('role')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -131,6 +140,7 @@
     </div>
 
 </div>
+@endsection
 
 @push('scripts')
 <script>
@@ -146,5 +156,3 @@
     toggleSchoolField();
 </script>
 @endpush
-
-@endsection

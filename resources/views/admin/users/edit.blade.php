@@ -1,6 +1,9 @@
 
 @extends('layouts.main')
 
+@section('title', 'Edit Pengguna')
+@section('page-heading', 'Edit Pengguna')
+
 @section('content')
 
 <div class="container-fluid px-2 px-md-3">
@@ -66,21 +69,22 @@
                         @enderror
                     </div>
 
-                    <div class="col-12">
-                        <label class="form-label fw-semibold">Nama Sekolah</label>
-                        <input type="text"
-                               name="school_name"
-                               value="{{ old('school_name', $user->school_name) }}"
-                               class="form-control @error('school_name') is-invalid @enderror">
-                        @error('school_name')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
+                    @if($user->role === 'student')
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Nama Sekolah</label>
+                            <input type="text"
+                                   name="school_name"
+                                   value="{{ old('school_name', $user->school_name) }}"
+                                   class="form-control @error('school_name') is-invalid @enderror"
+                                   placeholder="Masukkan nama sekolah">
+                            @error('school_name')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    @endif
 
                     <div class="col-12">
-                        <label class="form-label fw-semibold">
-                            Password Baru
-                        </label>
+                        <label class="form-label fw-semibold">Password Baru</label>
                         <input type="password"
                                name="password"
                                class="form-control @error('password') is-invalid @enderror"

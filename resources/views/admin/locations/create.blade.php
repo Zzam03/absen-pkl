@@ -2,6 +2,7 @@
 @extends('layouts.main')
 
 @section('title', 'Tambah Lokasi')
+@section('page-heading', 'Tambah Lokasi')
 
 @section('content')
 <div class="container-fluid px-0">

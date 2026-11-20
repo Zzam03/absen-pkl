@@ -1,4 +1,3 @@
-
 @extends('layouts.main')
 
 @section('title', 'Detail Siswa - PKL Connect')
@@ -19,20 +18,27 @@
         </h4>
 
         <p class="text-muted mb-0">
-            Detail aktivitas dan perkembangan siswa PKL.
+            @if(auth()->user()->role === 'pembimbing_sekolah')
+                Pemantauan siswa {{ auth()->user()->school_name }}.
+            @else
+                Pemantauan siswa bimbingan di tempat PKL.
+            @endif
         </p>
     </div>
 
-    <a href="{{ route('pembimbing.nilai.form', $placement) }}"
+    <a href="{{ route('pembimbing.penilaian.form', $placement) }}"
        class="btn btn-primary">
         <i class="bi bi-pencil-square me-1"></i> Form Penilaian
     </a>
 </div>
 
-{{-- INFORMASI PENEMPATAN --}}
+{{-- INFORMASI SISWA --}}
 <div class="card border-0 shadow-sm rounded-4 mb-4">
     <div class="card-body p-4">
-        <h5 class="fw-bold mb-3">Informasi Siswa</h5>
+        <h5 class="fw-bold mb-3">
+            <i class="bi bi-person-badge text-primary me-2"></i>
+            Informasi Siswa
+        </h5>
 
         <div class="row g-3">
             <div class="col-md-4">
@@ -72,7 +78,7 @@
     </div>
 </div>
 
-{{-- RINGKASAN NILAI --}}
+{{-- RINGKASAN --}}
 <div class="row g-3 mb-4">
     <div class="col-md-4">
         <div class="card border-0 shadow-sm rounded-4 h-100">
@@ -96,6 +102,7 @@
         <div class="card border-0 shadow-sm rounded-4 h-100">
             <div class="card-body p-3">
                 <small class="text-muted">Nilai Akhir</small>
+
                 @if($score)
                     <h3 class="fw-bold text-success mb-0">
                         {{ number_format((float) $score->final_score, 2) }}
@@ -116,6 +123,7 @@
                 <i class="bi bi-calendar-check text-primary me-2"></i>
                 Riwayat Absensi
             </h5>
+
             <span class="badge bg-primary-subtle text-primary">
                 {{ $attendances->total() }} Data
             </span>
@@ -225,6 +233,7 @@
                                 <div class="fw-bold">
                                     {{ $journal->date?->format('d F Y') ?? '-' }}
                                 </div>
+
                                 <small class="text-muted">
                                     Jurnal #{{ $journal->id }}
                                 </small>
@@ -249,8 +258,10 @@
                             <div class="mb-3">
                                 <a href="{{ asset('storage/' . $journal->photo) }}"
                                    target="_blank"
+                                   rel="noopener"
                                    class="btn btn-sm btn-outline-secondary">
-                                    <i class="bi bi-image me-1"></i> Lihat Foto Kegiatan
+                                    <i class="bi bi-image me-1"></i>
+                                    Lihat Foto Kegiatan
                                 </a>
                             </div>
                         @endif
@@ -264,20 +275,19 @@
 
                         {{-- TOMBOL PARAF DAN REVISI --}}
                         @if($journal->status === 'pending')
-
                             <div class="border-top pt-3 mt-2">
-                                <div class="d-flex flex-wrap gap-2 mb-3">
 
+                                <div class="mb-3">
                                     <form action="{{ route('pembimbing.jurnal.paraf', $journal) }}"
                                           method="POST"
                                           onsubmit="return confirm('Apakah kamu yakin ingin memberikan paraf pada jurnal ini?')">
                                         @csrf
+
                                         <button type="submit" class="btn btn-sm btn-success">
                                             <i class="bi bi-check-circle me-1"></i>
                                             Setujui & Paraf
                                         </button>
                                     </form>
-
                                 </div>
 
                                 <form action="{{ route('pembimbing.jurnal.revisi', $journal) }}"
@@ -306,6 +316,7 @@
                             <div class="small text-success border-top pt-2 mt-2">
                                 <i class="bi bi-patch-check-fill me-1"></i>
                                 Jurnal sudah diparaf pembimbing.
+
                                 @if($journal->pembimbing_signed_at)
                                     {{ $journal->pembimbing_signed_at->format('d-m-Y H:i') }}
                                 @endif
@@ -346,11 +357,13 @@
                         </strong>
                     </p>
                 @else
-                    <p class="text-muted mb-0">Siswa belum memiliki nilai akhir.</p>
+                    <p class="text-muted mb-0">
+                        Siswa belum memiliki nilai akhir.
+                    </p>
                 @endif
             </div>
 
-            <a href="{{ route('pembimbing.nilai.form', $placement) }}"
+            <a href="{{ route('pembimbing.penilaian.form', $placement) }}"
                class="btn btn-primary">
                 <i class="bi bi-pencil-square me-1"></i>
                 {{ $score ? 'Ubah Penilaian' : 'Beri Penilaian' }}

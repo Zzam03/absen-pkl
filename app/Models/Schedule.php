@@ -11,6 +11,10 @@ class Schedule extends Model
 
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'date' => 'date',
+    ];
+
     public function placement()
     {
         return $this->belongsTo(Placement::class);

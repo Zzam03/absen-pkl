@@ -15,32 +15,44 @@ class RekapController extends Controller
 {
     private function students()
     {
-        return User::where('role', 'student')->orderBy('name')->get();
+        return User::where('role', 'student')
+            ->orderBy('name')
+            ->get();
     }
 
-    // Query rekap absen dengan filter. Dipakai halaman rekap dan export.
     private function queryAbsen(Request $request)
     {
         $request->validate([
-            'dari'   => 'nullable|date',
+            'dari' => 'nullable|date',
             'sampai' => 'nullable|date|after_or_equal:dari',
             'status' => 'nullable|in:hadir,izin,sakit,alpha',
         ]);
 
-        $query = Attendance::with(['student', 'placement.location'])->orderByDesc('date');
+        $query = Attendance::with(['student', 'placement.location'])
+            ->whereHas('student', function ($student) {
+                $student->where('role', 'student');
+            })
+            ->whereHas('placement', function ($placement) {
+                $placement->where('status', 'active');
+            })
+            ->orderByDesc('date');
 
         if ($request->filled('dari')) {
             $query->whereDate('date', '>=', $request->dari);
         }
+
         if ($request->filled('sampai')) {
             $query->whereDate('date', '<=', $request->sampai);
         }
+
         if ($request->filled('student_id')) {
             $query->where('student_id', $request->student_id);
         }
+
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
+
         if ($request->boolean('outside')) {
             $query->where('is_outside_area', true);
         }
@@ -50,19 +62,24 @@ class RekapController extends Controller
 
     public function index(Request $request)
     {
-        $attendances = $this->queryAbsen($request)->paginate(15)->withQueryString();
-        $students    = $this->students();
+        $attendances = $this->queryAbsen($request)
+            ->paginate(15)
+            ->withQueryString();
+
+        $students = $this->students();
 
         return view('admin.rekap', compact('attendances', 'students'));
     }
 
-    // Export rekap absen (filter ikut terbawa lewat query string)
     public function export(Request $request, string $format)
     {
         $rows = $this->queryAbsen($request)->get();
 
         if ($format === 'xlsx') {
-            return Excel::download(new AttendanceExport($rows), 'rekap-absensi.xlsx');
+            return Excel::download(
+                new AttendanceExport($rows),
+                'rekap-absensi.xlsx'
+            );
         }
 
         return Pdf::loadView('pdf.rekap', ['rows' => $rows])
@@ -70,16 +87,22 @@ class RekapController extends Controller
             ->download('rekap-absensi.pdf');
     }
 
-    // Rekap jurnal semua siswa
     public function jurnal(Request $request)
     {
-        $request->validate(['status' => 'nullable|in:pending,approved,revision']);
+        $request->validate([
+            'status' => 'nullable|in:pending,approved,revision',
+        ]);
 
-        $query = Journal::with(['student', 'signer'])->orderByDesc('date');
+        $query = Journal::with(['student', 'signer'])
+            ->whereHas('student', function ($student) {
+                $student->where('role', 'student');
+            })
+            ->orderByDesc('date');
 
         if ($request->filled('student_id')) {
             $query->where('student_id', $request->student_id);
         }
+
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }

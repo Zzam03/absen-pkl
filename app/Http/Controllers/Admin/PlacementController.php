@@ -14,11 +14,17 @@ class PlacementController extends Controller
     private function rules(bool $edit = false): array
     {
         $rules = [
-            'student_id'    => ['required', Rule::exists('users', 'id')->where('role', 'student')],
-            'pembimbing_id' => ['required', Rule::exists('users', 'id')->where('role', 'pembimbing')],
-            'location_id'   => ['required', 'exists:locations,id'],
-            'start_date'    => ['required', 'date'],
-            'end_date'      => ['required', 'date', 'after_or_equal:start_date'],
+            'student_id' => [
+                'required',
+                Rule::exists('users', 'id')->where('role', 'student'),
+            ],
+            'pembimbing_id' => [
+                'required',
+                Rule::exists('users', 'id')->where('role', 'pembimbing_kantor'),
+            ],
+            'location_id' => ['required', 'exists:locations,id'],
+            'start_date' => ['required', 'date'],
+            'end_date' => ['required', 'date', 'after_or_equal:start_date'],
         ];
 
         if ($edit) {
@@ -28,19 +34,32 @@ class PlacementController extends Controller
         return $rules;
     }
 
-    // Data pilihan untuk dropdown di form
     private function dropdowns(): array
     {
         return [
-            'students'    => User::where('role', 'student')->where('is_active', true)->orderBy('name')->get(),
-            'pembimbings' => User::where('role', 'pembimbing')->where('is_active', true)->orderBy('name')->get(),
-            'locations'   => Location::orderBy('name')->get(),
+            'students' => User::where('role', 'student')
+                ->where('is_active', true)
+                ->orderBy('name')
+                ->get(),
+
+            'pembimbings' => User::where('role', 'pembimbing_kantor')
+                ->where('is_active', true)
+                ->orderBy('name')
+                ->get(),
+
+            'locations' => Location::orderBy('name')->get(),
         ];
     }
 
     public function index()
     {
-        $placements = Placement::with(['student', 'pembimbing', 'location', 'score'])
+        $placements = Placement::with([
+            'student',
+            'pembimbing',
+            'location',
+            'score',
+        ])
+            ->where('status', 'active')
             ->orderByDesc('start_date')
             ->paginate(15);
 
@@ -57,20 +76,28 @@ class PlacementController extends Controller
         $data = $request->validate($this->rules());
 
         $sudahAktif = Placement::where('student_id', $data['student_id'])
-            ->where('status', 'active')->exists();
+            ->where('status', 'active')
+            ->exists();
 
         if ($sudahAktif) {
-            return back()->withInput()->with('error', 'Siswa ini sudah punya penempatan aktif.');
+            return back()
+                ->withInput()
+                ->with('error', 'Siswa ini sudah memiliki penempatan aktif.');
         }
 
         Placement::create($data + ['status' => 'active']);
 
-        return redirect()->route('admin.placements.index')->with('success', 'Penempatan dibuat!');
+        return redirect()
+            ->route('admin.placements.index')
+            ->with('success', 'Penempatan berhasil dibuat!');
     }
 
     public function edit(Placement $placement)
     {
-        return view('admin.placements.edit', $this->dropdowns() + ['placement' => $placement]);
+        return view(
+            'admin.placements.edit',
+            $this->dropdowns() + ['placement' => $placement]
+        );
     }
 
     public function update(Request $request, Placement $placement)
@@ -84,22 +111,34 @@ class PlacementController extends Controller
                 ->exists();
 
         if ($bentrok) {
-            return back()->withInput()->with('error', 'Siswa ini sudah punya penempatan aktif lain.');
+            return back()
+                ->withInput()
+                ->with('error', 'Siswa ini sudah memiliki penempatan aktif lain.');
         }
 
         $placement->update($data);
 
-        return redirect()->route('admin.placements.index')->with('success', 'Penempatan diperbarui!');
+        return redirect()
+            ->route('admin.placements.index')
+            ->with('success', 'Penempatan berhasil diperbarui!');
     }
 
     public function destroy(Placement $placement)
     {
-        if ($placement->attendances()->exists() || $placement->journals()->exists()) {
-            return back()->with('error', 'Sudah ada data absen atau jurnal. Ubah statusnya menjadi cancelled lewat Edit.');
+        if (
+            $placement->attendances()->exists()
+            || $placement->journals()->exists()
+        ) {
+            return back()->with(
+                'error',
+                'Penempatan sudah memiliki data absensi atau jurnal. Ubah statusnya menjadi dibatalkan melalui menu Edit.'
+            );
         }
 
         $placement->delete();
 
-        return redirect()->route('admin.placements.index')->with('success', 'Penempatan dihapus!');
+        return redirect()
+            ->route('admin.placements.index')
+            ->with('success', 'Penempatan berhasil dihapus!');
     }
 }

@@ -1,154 +1,86 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - PKL Connect</title>
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <link href="{{ asset('css/custom.css') }}" rel="stylesheet">
-
-    <style>
-        body {
-            min-height: 100vh;
-            background: #f4f7fb;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .login-wrapper {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-        }
-
-        .login-card {
-            width: 100%;
-            max-width: 430px;
-            background: white;
-            padding: 40px;
-            border-radius: 16px;
-            box-shadow: 0 10px 35px rgba(20, 33, 61, .08);
-        }
-
-        .login-icon {
-            width: 64px;
-            height: 64px;
-            background: #eff6ff;
-            color: #2563eb;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 30px;
-            margin: 0 auto 18px;
-        }
-
-        .form-control {
-            padding: 12px 14px;
-            border-radius: 8px;
-        }
-
-        .btn-login {
-            background: #2563eb;
-            color: white;
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: 600;
-        }
-
-        .btn-login:hover {
-            background: #1d4ed8;
-            color: white;
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
 
-<div class="login-wrapper">
-    <div class="login-card">
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
 
-        <div class="text-center mb-4">
-            <div class="login-icon">
-                <i class="bi bi-calendar-check"></i>
-            </div>
+    <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
 
-            <h3 class="fw-bold mb-1">PKL Connect</h3>
-            <p class="text-secondary mb-0">Sistem Informasi Absensi PKL</p>
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-bold text-blue-600">PKL Connect</h1>
+            <p class="text-gray-500 text-sm mt-1">
+                Silakan login untuk melanjutkan
+            </p>
         </div>
 
-        @if (session('status'))
-            <div class="alert alert-success">
-                {{ session('status') }}
+        {{-- PESAN ERROR --}}
+        @if(session('error'))
+            <div class="bg-red-100 text-red-700 p-3 rounded-lg mb-4 text-sm">
+                {{ session('error') }}
             </div>
         @endif
 
-        @if ($errors->any())
-            <div class="alert alert-danger">
-                Email atau password tidak sesuai.
+        @if($errors->any())
+            <div class="bg-red-100 text-red-700 p-3 rounded-lg mb-4 text-sm">
+                {{ $errors->first() }}
             </div>
         @endif
 
+        {{-- FORM LOGIN --}}
         <form method="POST" action="{{ route('login') }}">
             @csrf
 
-            <div class="mb-3">
-                <label for="name" class="form-label fw-semibold">Nama</label>
-<input
-    id="name"
-    type="text"
-    name="name"
-    value="{{ old('name') }}"
-    class="form-control"
-    placeholder="Masukkan nama depan"
-    required
-    autofocus
-    autocomplete="username"
->
-            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Nama Pengguna
+                </label>
 
-            <div class="mb-3">
-                <label for="password" class="form-label fw-semibold">Password</label>
                 <input
-                    id="password"
-                    type="password"
-                    name="password"
-                    class="form-control"
-                    placeholder="Masukkan password"
+                    type="text"
+                    name="name"
+                    value="{{ old('name') }}"
+                    placeholder="Masukkan nama pengguna"
                     required
-                    autocomplete="current-password"
+                    autofocus
+                    autocomplete="username"
+                    class="w-full rounded-lg border border-gray-300 p-3 focus:border-blue-500 focus:ring-blue-500"
                 >
             </div>
 
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="remember" id="remember_me">
-                    <label class="form-check-label small" for="remember_me">
-                        Ingat saya
-                    </label>
-                </div>
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Password
+                </label>
 
-                @if (Route::has('password.request'))
-                    <a href="{{ route('password.request') }}" class="small text-decoration-none">
-                        Lupa password?
-                    </a>
-                @endif
+                <input
+                    type="password"
+                    name="password"
+                    placeholder="Masukkan password"
+                    required
+                    autocomplete="current-password"
+                    class="w-full rounded-lg border border-gray-300 p-3 focus:border-blue-500 focus:ring-blue-500"
+                >
             </div>
 
-            <button type="submit" class="btn btn-login w-100">
-                Masuk <i class="bi bi-arrow-right ms-1"></i>
+            <button
+                type="submit"
+                class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition"
+            >
+                Masuk
             </button>
+
         </form>
 
-        <p class="text-center text-secondary small mt-4 mb-0">
-            © {{ date('Y') }} PKL Connect
+        <p class="text-center text-xs text-gray-400 mt-6">
+            PKL Connect &copy; {{ date('Y') }}
         </p>
 
     </div>
-</div>
 
 </body>
 </html>
