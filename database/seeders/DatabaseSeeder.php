@@ -12,25 +12,41 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Aman dijalankan berulang (updateOrCreate / firstOrCreate)
+        // Akun Admin
         User::updateOrCreate(
             ['email' => 'admin@absen.test'],
-            ['name' => 'Admin HR', 'password' => Hash::make('password123'), 'role' => 'admin']
+            [
+                'name' => 'Admin HR',
+                'password' => Hash::make('password123'),
+                'role' => 'admin',
+                'is_active' => true,
+            ]
         );
 
+        // Akun Pembimbing Kantor
         $pembimbing = User::updateOrCreate(
             ['email' => 'pembimbing@absen.test'],
-            ['name' => 'Pembimbing Satu', 'password' => Hash::make('password123'),
-             'role' => 'pembimbing', 'phone' => '081200000001']
+            [
+                'name' => 'Pembimbing Satu',
+                'password' => Hash::make('password123'),
+                'role' => 'pembimbing_kantor',
+                'phone' => '081200000001',
+                'is_active' => true,
+            ]
         );
 
-        // Koordinat contoh. Ganti nanti lewat menu Lokasi dengan koordinat tempat tesmu.
-        $lokasi = Location::firstOrCreate(
+        // Lokasi PKL PT MSN Bandung
+        $lokasi = Location::updateOrCreate(
             ['name' => 'Divisi IT'],
-            ['address' => 'Kantor Pusat', 'latitude' => -6.2000000,
-             'longitude' => 106.8166670, 'radius_meter' => 100]
+            [
+                'address' => 'PT MSN, Jl. Reog No. 18, Turangga, Lengkong, Bandung 40264',
+                'latitude' => -6.936764118577241,
+                'longitude' => 107.63201004418337,
+                'radius_meter' => 100,
+            ]
         );
 
+        // Data siswa demo
         $siswa = [
             ['siswa1@absen.test', 'Siswa Satu', 'SMK Negeri 1'],
             ['siswa2@absen.test', 'Siswa Dua', 'SMK Negeri 2'],
@@ -39,14 +55,26 @@ class DatabaseSeeder extends Seeder
         foreach ($siswa as [$email, $nama, $sekolah]) {
             $user = User::updateOrCreate(
                 ['email' => $email],
-                ['name' => $nama, 'password' => Hash::make('password123'),
-                 'role' => 'student', 'school_name' => $sekolah]
+                [
+                    'name' => $nama,
+                    'password' => Hash::make('password123'),
+                    'role' => 'student',
+                    'school_name' => $sekolah,
+                    'is_active' => true,
+                ]
             );
 
             Placement::firstOrCreate(
-                ['student_id' => $user->id, 'status' => 'active'],
-                ['location_id' => $lokasi->id, 'pembimbing_id' => $pembimbing->id,
-                 'start_date' => today()->subDays(7), 'end_date' => today()->addMonths(3)]
+                [
+                    'student_id' => $user->id,
+                    'status' => 'active',
+                ],
+                [
+                    'location_id' => $lokasi->id,
+                    'pembimbing_id' => $pembimbing->id,
+                    'start_date' => today()->subDays(7),
+                    'end_date' => today()->addMonths(3),
+                ]
             );
         }
     }

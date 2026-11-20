@@ -8,18 +8,31 @@
 
 <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
     <div>
-        <h4 class="fw-bold mb-1">Daftar Siswa Bimbingan</h4>
-        <p class="text-muted mb-0">Pantau penempatan dan perkembangan siswa PKL.</p>
+        <h4 class="fw-bold mb-1">
+            @if(auth()->user()->role === 'pembimbing_sekolah')
+                Pemantauan Siswa Sekolah
+            @else
+                Daftar Siswa Bimbingan
+            @endif
+        </h4>
+
+        <p class="text-muted mb-0">
+            @if(auth()->user()->role === 'pembimbing_sekolah')
+                Memantau perkembangan siswa {{ auth()->user()->school_name }}.
+            @else
+                Pantau penempatan dan perkembangan siswa PKL.
+            @endif
+        </p>
     </div>
 
     <span class="badge bg-primary-subtle text-primary px-3 py-2">
-        {{ $placements->count() }} Penempatan
+        {{ $placements->count() }} Siswa
     </span>
 </div>
 
 <div class="row g-3 mb-4">
     <div class="col-md-4">
-        <div class="card border-0 shadow-sm rounded-4">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
             <div class="card-body p-3">
                 <small class="text-muted">Total Siswa</small>
                 <h3 class="fw-bold mb-0">{{ $placements->count() }}</h3>
@@ -28,7 +41,7 @@
     </div>
 
     <div class="col-md-4">
-        <div class="card border-0 shadow-sm rounded-4">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
             <div class="card-body p-3">
                 <small class="text-muted">Penempatan Aktif</small>
                 <h3 class="fw-bold text-success mb-0">
@@ -39,7 +52,7 @@
     </div>
 
     <div class="col-md-4">
-        <div class="card border-0 shadow-sm rounded-4">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
             <div class="card-body p-3">
                 <small class="text-muted">Nilai Sudah Terbit</small>
                 <h3 class="fw-bold text-primary mb-0">
@@ -53,7 +66,13 @@
 <div class="card border-0 shadow-sm rounded-4">
     <div class="card-body p-4">
 
-        <h5 class="fw-bold mb-3">Data Siswa</h5>
+        <h5 class="fw-bold mb-3">
+            @if(auth()->user()->role === 'pembimbing_sekolah')
+                Data Siswa {{ auth()->user()->school_name }}
+            @else
+                Data Siswa Bimbingan
+            @endif
+        </h5>
 
         @if($placements->count())
             <div class="table-responsive">
@@ -85,9 +104,13 @@
                                     </small>
                                 </td>
 
-                                <td>{{ $placement->student->school_name ?? '-' }}</td>
+                                <td>
+                                    {{ $placement->student->school_name ?? '-' }}
+                                </td>
 
-                                <td>{{ $placement->location->name ?? '-' }}</td>
+                                <td>
+                                    {{ $placement->location->name ?? '-' }}
+                                </td>
 
                                 <td class="text-nowrap">
                                     <small>
@@ -112,10 +135,12 @@
                                 <td>
                                     @if($placement->score)
                                         <span class="badge bg-success">
-                                            {{ number_format((float)$placement->score->final_score, 2) }}
+                                            {{ number_format((float) $placement->score->final_score, 2) }}
                                         </span>
                                     @else
-                                        <span class="badge bg-warning text-dark">Belum Dinilai</span>
+                                        <span class="badge bg-warning text-dark">
+                                            Belum Dinilai
+                                        </span>
                                     @endif
                                 </td>
 
@@ -133,9 +158,17 @@
         @else
             <div class="text-center py-5">
                 <i class="bi bi-people text-muted" style="font-size: 3rem;"></i>
-                <h6 class="fw-bold mt-3">Belum Ada Siswa Bimbingan</h6>
+
+                <h6 class="fw-bold mt-3">
+                    Belum Ada Siswa Bimbingan
+                </h6>
+
                 <p class="text-muted mb-0">
-                    Data penempatan siswa yang menjadi tanggung jawabmu akan muncul di sini.
+                    @if(auth()->user()->role === 'pembimbing_sekolah')
+                        Belum ada siswa dari {{ auth()->user()->school_name }} yang memiliki penempatan PKL.
+                    @else
+                        Data penempatan siswa yang menjadi tanggung jawabmu akan muncul di sini.
+                    @endif
                 </p>
             </div>
         @endif

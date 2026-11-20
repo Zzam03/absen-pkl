@@ -2,6 +2,7 @@
 @extends('layouts.main')
 
 @section('title', 'Rekap Absensi')
+@section('page-heading', 'Rekap Absensi')
 
 @section('content')
 <div class="container-fluid py-3">

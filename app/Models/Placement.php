@@ -1,10 +1,59 @@
 <?php
+
 namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-class Placement extends Model {
+
+class Placement extends Model
+{
+    use HasFactory;
+
     protected $guarded = ['id'];
-    public function student() { return $this->belongsTo(User::class, 'student_id'); }
-    public function mentor() { return $this->belongsTo(User::class, 'pembimbing_id'); }
-    public function location() { return $this->belongsTo(Location::class); }
-    public function schedules() { return $this->hasMany(Schedule::class); }
+
+    protected $casts = [
+        'start_date' => 'date',
+        'end_date' => 'date',
+    ];
+
+    public function student()
+    {
+        return $this->belongsTo(User::class, 'student_id');
+    }
+
+    public function mentor()
+    {
+        return $this->belongsTo(User::class, 'pembimbing_id');
+    }
+
+    public function pembimbing()
+    {
+        return $this->belongsTo(User::class, 'pembimbing_id');
+    }
+
+
+    public function location()
+    {
+        return $this->belongsTo(Location::class);
+    }
+
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
+    }
+
+    public function journals()
+    {
+        return $this->hasMany(Journal::class);
+    }
+
+    public function score()
+    {
+        return $this->hasOne(Score::class);
+    }
+
+    public function schedules()
+    {
+        return $this->hasMany(Schedule::class);
+    }
 }
