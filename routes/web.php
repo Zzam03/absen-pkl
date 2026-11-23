@@ -1,4 +1,3 @@
-
 <?php
 
 use Illuminate\Support\Facades\Route;
@@ -19,6 +18,7 @@ use App\Http\Controllers\Pembimbing\ParafController;
 use App\Http\Controllers\Pembimbing\PenilaianController;
 use App\Http\Controllers\Pembimbing\RekapSekolahController;
 use App\Http\Controllers\Pembimbing\RekapKantorController;
+use App\Http\Controllers\LeaveRequestController; // === TAMBAHAN BARU ===
 use App\Models\Placement;
 use App\Models\Attendance;
 use App\Models\Journal;
@@ -171,6 +171,9 @@ Route::middleware(['auth', 'devicelock'])->group(function () {
     // ADMIN
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
         Route::resource('users', UserController::class)->except(['show']);
+        // === TAMBAHAN BARU: Route Form Transaksional ===
+        Route::post('/users/store-with-placement', [UserController::class, 'storeWithPlacement'])->name('users.storeWithPlacement'); 
+        
         Route::resource('locations', LocationController::class)->except(['show']);
         Route::resource('placements', PlacementController::class)->except(['show']);
 
@@ -194,8 +197,9 @@ Route::middleware(['auth', 'devicelock'])->group(function () {
 
         Route::get('/riwayat', [AbsenController::class, 'riwayat'])->name('riwayat');
 
-        Route::get('/izin', [AbsenController::class, 'izinCreate'])->name('izin.create');
-        Route::post('/izin', [AbsenController::class, 'izinStore'])->name('izin.store');
+        // === PERUBAHAN BARU: Menggunakan LeaveRequestController ===
+        Route::get('/izin', [LeaveRequestController::class, 'indexStudent'])->name('izin.create');
+        Route::post('/izin', [LeaveRequestController::class, 'store'])->name('izin.store');
 
         Route::resource('jurnal', StudentJurnalController::class)
             ->except(['show', 'destroy'])
@@ -217,6 +221,10 @@ Route::middleware(['auth', 'devicelock'])->group(function () {
 
             Route::post('/jurnal/{journal}/paraf', [ParafController::class, 'paraf'])->name('jurnal.paraf');
             Route::post('/jurnal/{journal}/revisi', [ParafController::class, 'revisi'])->name('jurnal.revisi');
+
+            // === TAMBAHAN BARU: Route Persetujuan Izin ===
+            Route::get('/izin', [LeaveRequestController::class, 'indexPembimbing'])->name('izin.index');
+            Route::put('/izin/{leaveRequest}', [LeaveRequestController::class, 'decide'])->name('izin.decide');
         });
 
 
