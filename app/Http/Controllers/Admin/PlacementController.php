@@ -54,7 +54,7 @@ class PlacementController extends Controller
         $placements = Placement::with([
             'student', 'pembimbing', 'location', 'score',
         ])
-            ->where('status', 'active')
+            ->whereIn('status', ['active', 'finished'])
             ->orderByDesc('start_date')
             ->paginate(15);
 

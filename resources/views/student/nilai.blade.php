@@ -163,6 +163,30 @@
             </div>
         </div>
 
+        @if($placement->status === 'finished' && $score)
+            <div class="card border-0 shadow-sm rounded-4 mt-4">
+                <div class="card-body p-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div>
+                        <h5 class="fw-bold mb-1">
+                            <i class="bi bi-award-fill text-success me-2"></i>
+                            Sertifikat PKL
+                        </h5>
+                        <p class="text-muted mb-0">
+                            Selamat! PKL telah selesai dan nilai sudah diterbitkan.
+                            Sertifikat kamu siap dicetak.
+                        </p>
+                    </div>
+                    <a href="{{ route('student.certificate', $placement) }}"
+                       class="btn btn-primary"
+                       target="_blank"
+                       rel="noopener">
+                        <i class="bi bi-printer-fill me-2"></i>
+                        Lihat / Cetak Sertifikat
+                    </a>
+                </div>
+            </div>
+        @endif
+
     @endif
 
 @endif

@@ -26,10 +26,17 @@
         </p>
     </div>
 
-    <a href="{{ route('pembimbing.penilaian.form', $placement) }}"
-       class="btn btn-primary">
-        <i class="bi bi-pencil-square me-1"></i> Form Penilaian
-    </a>
+    @if($score)
+        <span class="badge bg-success px-3 py-2">
+            <i class="bi bi-check-circle-fill me-1"></i>
+            Nilai Sudah Diterbitkan
+        </span>
+    @else
+        <a href="{{ route('pembimbing.penilaian.form', $placement) }}"
+           class="btn btn-primary">
+            <i class="bi bi-pencil-square me-1"></i> Form Penilaian
+        </a>
+    @endif
 </div>
 
 {{-- INFORMASI SISWA --}}

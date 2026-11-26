@@ -1,9 +1,9 @@
-
 <?php
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\PlacementController;
@@ -19,6 +19,7 @@ use App\Http\Controllers\Pembimbing\ParafController;
 use App\Http\Controllers\Pembimbing\PenilaianController;
 use App\Http\Controllers\Pembimbing\RekapSekolahController;
 use App\Http\Controllers\Pembimbing\RekapKantorController;
+use App\Http\Controllers\Pembimbing\LeaveRequestController;
 use App\Models\Placement;
 use App\Models\Attendance;
 use App\Models\Journal;
@@ -201,6 +202,9 @@ Route::middleware(['auth', 'devicelock'])->group(function () {
             ->except(['show', 'destroy'])
             ->parameters(['jurnal' => 'journal']);
 
+        Route::get('/sertifikat/{placement}', [CertificateController::class, 'show'])
+            ->name('certificate');
+
         Route::get('/nilai', [NilaiController::class, 'show'])->name('nilai');
     });
 
@@ -209,12 +213,25 @@ Route::middleware(['auth', 'devicelock'])->group(function () {
     Route::middleware('role:pembimbing_kantor,pembimbing_sekolah')
         ->prefix('pembimbing')->name('pembimbing.')->group(function () {
 
+            // DATA SISWA BIMBINGAN
             Route::get('/siswa', [SiswaController::class, 'index'])->name('siswa.index');
             Route::get('/siswa/{placement}', [SiswaController::class, 'show'])->name('siswa.show');
 
+            // PERSETUJUAN IZIN / SAKIT
+            Route::get('/pengajuan-izin', [LeaveRequestController::class, 'index'])
+                ->name('izin.index');
+
+            Route::put('/pengajuan-izin/{leaveRequest}/approve', [LeaveRequestController::class, 'approve'])
+                ->name('izin.approve');
+
+            Route::put('/pengajuan-izin/{leaveRequest}/reject', [LeaveRequestController::class, 'reject'])
+                ->name('izin.reject');
+
+            // PENILAIAN SISWA
             Route::get('/penilaian/{placement}', [PenilaianController::class, 'form'])->name('penilaian.form');
             Route::post('/penilaian/{placement}', [PenilaianController::class, 'store'])->name('penilaian.store');
 
+            // JURNAL SISWA
             Route::post('/jurnal/{journal}/paraf', [ParafController::class, 'paraf'])->name('jurnal.paraf');
             Route::post('/jurnal/{journal}/revisi', [ParafController::class, 'revisi'])->name('jurnal.revisi');
         });
@@ -255,5 +272,6 @@ Route::middleware(['auth', 'devicelock'])->group(function () {
             Route::put('/jadwal/{id}', [JadwalPembimbingController::class, 'update'])
                 ->name('jadwal.update');
         });
+
 
 });

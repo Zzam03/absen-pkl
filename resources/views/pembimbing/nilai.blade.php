@@ -104,7 +104,7 @@
             </p>
         </div>
 
-        <form action="{{ route('pembimbing.nilai.store', $placement) }}"
+        <form action="{{ route('pembimbing.penilaian.store', $placement) }}"
               method="POST">
             @csrf
 

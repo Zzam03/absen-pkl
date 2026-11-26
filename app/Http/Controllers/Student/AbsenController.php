@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use App\Models\Placement;
 use App\Models\Schedule;
+use App\Models\LeaveRequest;
 use Illuminate\Http\Request;
 
 class AbsenController extends Controller
@@ -151,7 +152,7 @@ class AbsenController extends Controller
         $data = $request->validate([
             'latitude'  => 'required|numeric|between:-90,90',
             'longitude' => 'required|numeric|between:-180,180',
-            'photo'     => 'required|image|max:4096',
+            // Foto tidak diperlukan untuk absen pulang.
         ]);
 
         $attendance = Attendance::where('student_id', auth()->id())
@@ -216,52 +217,97 @@ class AbsenController extends Controller
     {
         $placement = $this->penempatanAktif();
 
-        $attendance = null;
+        $leaveRequests = LeaveRequest::with('reviewer')
+            ->where('student_id', auth()->id())
+            ->orderByDesc('date')
+            ->get();
 
-        if ($placement) {
-            $attendance = Attendance::where('student_id', auth()->id())
-                ->whereDate('date', today())
-                ->first();
-        }
-
-        return view('student.izin', compact('placement', 'attendance'));
+        return view('student.izin', compact(
+            'placement',
+            'leaveRequests'
+        ));
     }
 
-    // SIMPAN IZIN / SAKIT
+    // SIMPAN PENGAJUAN IZIN / SAKIT
     public function izinStore(Request $request)
     {
         $placement = $this->penempatanAktif();
 
         if (!$placement) {
-            return back()->with('error', 'Kamu tidak memiliki penempatan PKL yang aktif hari ini.');
-        }
-
-        if ($this->jadwalHariIniLibur($placement)) {
-            return back()->with('error', 'Hari ini merupakan jadwal libur PKL. Kamu tidak perlu mengajukan izin atau sakit.');
+            return back()->with('error', 'Kamu tidak memiliki penempatan PKL yang aktif.');
         }
 
         $data = $request->validate([
+            'date' => 'required|date|after_or_equal:today',
             'status' => 'required|in:izin,sakit',
-            'note'   => 'required|string|min:5|max:1000',
+            'note' => 'required|string|min:5|max:1000',
         ]);
 
-        $attendance = Attendance::where('student_id', auth()->id())
-            ->whereDate('date', today())
-            ->first();
+        $tanggal = $data['date'];
 
-        if ($attendance) {
-            return back()->with('error', 'Absensi hari ini sudah tercatat dan tidak dapat diajukan kembali.');
+        // Memastikan tanggal berada dalam masa penempatan PKL
+        if (
+            $tanggal < $placement->start_date->toDateString() ||
+            $tanggal > $placement->end_date->toDateString()
+        ) {
+            return back()->withInput()->with(
+                'error',
+                'Tanggal berada di luar masa penempatan PKL.'
+            );
         }
 
-        Attendance::create([
-            'student_id'   => auth()->id(),
+        // Memeriksa jadwal libur pada tanggal yang dipilih
+        $hariLibur = Schedule::where('placement_id', $placement->id)
+            ->whereDate('date', $tanggal)
+            ->where('status', 'libur')
+            ->exists();
+
+        if ($hariLibur) {
+            return back()->withInput()->with(
+                'error',
+                'Tanggal tersebut merupakan jadwal libur PKL.'
+            );
+        }
+
+        // Memeriksa catatan absensi yang sudah ada
+        $attendanceExists = Attendance::where('student_id', auth()->id())
+            ->whereDate('date', $tanggal)
+            ->exists();
+
+        if ($attendanceExists) {
+            return back()->withInput()->with(
+                'error',
+                'Tanggal tersebut sudah memiliki catatan absensi.'
+            );
+        }
+
+        // Memeriksa pengajuan sebelumnya
+        $requestExists = LeaveRequest::where('student_id', auth()->id())
+            ->whereDate('date', $tanggal)
+            ->exists();
+
+        if ($requestExists) {
+            return back()->withInput()->with(
+                'error',
+                'Tanggal tersebut sudah pernah diajukan.'
+            );
+        }
+
+        // Menyimpan pengajuan dengan status menunggu
+        LeaveRequest::create([
+            'student_id' => auth()->id(),
             'placement_id' => $placement->id,
-            'date'         => today(),
-            'status'       => $data['status'],
-            'note'         => $data['note'],
+            'date' => $tanggal,
+            'status' => $data['status'],
+            'note' => $data['note'],
+            'approval_status' => 'pending',
         ]);
 
-        return redirect()->route('student.riwayat')
-            ->with('success', 'Pengajuan izin/sakit berhasil dicatat.');
+        return redirect()
+            ->route('student.izin.create')
+            ->with(
+                'success',
+                'Pengajuan berhasil dikirim dan menunggu persetujuan pembimbing.'
+            );
     }
 }
