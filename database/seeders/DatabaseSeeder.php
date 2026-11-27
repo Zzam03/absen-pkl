@@ -155,12 +155,13 @@ class DatabaseSeeder extends Seeder
                     ]
                 );
 
-                LeaveRequest::updateOrCreate(
+                               LeaveRequest::updateOrCreate(
                     ['student_id' => $student->id, 'date' => today()->addDays(2)],
                     [
-                        'type' => 'sakit',
-                        'reason' => 'Demam dan harus istirahat sesuai surat dokter.',
-                        'status' => 'pending',
+                        'placement_id' => $placement->id, // Wajib ditambahkan sesuai tabel teman
+                        'status' => 'sakit',              // 'type' diganti 'status'
+                        'note' => 'Demam dan harus istirahat sesuai surat dokter.', // 'reason' diganti 'note'
+                        'approval_status' => 'pending',   // 'status' diganti 'approval_status'
                     ]
                 );
             }
