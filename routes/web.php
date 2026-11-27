@@ -172,6 +172,8 @@ Route::middleware(['auth', 'devicelock'])->group(function () {
     // ADMIN
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
         Route::resource('users', UserController::class)->except(['show']);
+        Route::post('/users/store-with-placement', [UserController::class, 'storeWithPlacement'])
+    ->name('users.storeWithPlacement');
         Route::resource('locations', LocationController::class)->except(['show']);
         Route::resource('placements', PlacementController::class)->except(['show']);
 
