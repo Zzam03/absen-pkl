@@ -24,13 +24,22 @@ use App\Models\Placement;
 use App\Models\Attendance;
 use App\Models\Journal;
 use App\Models\Schedule;
-use Illuminate\Support\Facades\DB; // TAMBAHAN UNTUK DB
+use Illuminate\Support\Facades\DB;
 
 Route::get('/', function () {
     return redirect()->route('login');
 });
 
 require __DIR__.'/auth.php';
+
+// ==============================================================
+// TAMBAHKAN ROUTE INI DI SINI (DI LUAR MIDDLEWARE) UNTUK MEMBUKA KUNCI
+// ==============================================================
+Route::get('/buka-semua-kunci', function () {
+    \App\Models\User::query()->update(['login_token' => null]);
+    return 'Semua kunci device berhasil di-reset! Silakan kembali ke halaman login.';
+});
+// ==============================================================
 
 Route::middleware(['auth', 'devicelock'])->group(function () {
 
@@ -76,9 +85,6 @@ Route::middleware(['auth', 'devicelock'])->group(function () {
                 ->where('status', 'hadir')
                 ->count();
 
-            // ========================================================
-            // PERBAIKAN ERROR MONTH (SQLite vs MySQL)
-            // ========================================================
             $driver = DB::connection()->getDriverName();
             $monthFunc = $driver === 'sqlite' ? "strftime('%m', date)" : "MONTH(date)";
 
@@ -91,7 +97,6 @@ Route::middleware(['auth', 'devicelock'])->group(function () {
                 ->groupBy('month')
                 ->orderBy('month')
                 ->get();
-            // ========================================================
 
             $jurnalStatus = Journal::selectRaw('status, COUNT(*) as total')
                 ->whereIn('placement_id', $placementIds)
@@ -282,6 +287,5 @@ Route::middleware(['auth', 'devicelock'])->group(function () {
             Route::put('/jadwal/{id}', [JadwalPembimbingController::class, 'update'])
                 ->name('jadwal.update');
         });
-
 
 });

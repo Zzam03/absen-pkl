@@ -22,9 +22,15 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        // Simpan token unik ke database agar device lain tidak bisa login
+        // 1. Buat token unik
         $user = auth()->user();
-        $user->update(['login_token' => \Illuminate\Support\Str::random(60)]);
+        $newToken = \Illuminate\Support\Str::random(60);
+        
+        // 2. Simpan token ke database
+        $user->update(['login_token' => $newToken]);
+        
+        // 3. SIMPAN TOKEN KE SESSION BROWSER (INI YANG TERTINGGAL SEBELUMNYA)
+        $request->session()->put('device_token', $newToken);
 
         return redirect()->intended(route('dashboard', absolute: false));
     }
