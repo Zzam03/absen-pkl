@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use App\Models\User; // TAMBAHAN: Import Model User
 
 class LoginRequest extends FormRequest
 {
@@ -36,6 +37,18 @@ class LoginRequest extends FormRequest
     public function authenticate(): void
     {
         $this->ensureIsNotRateLimited();
+
+        // ========================================================
+        // LOGIKA STRICT DEVICE LOCK (TAMBAHAN BARU)
+        // ========================================================
+        $user = User::where('name', $this->input('name'))->first();
+
+        if ($user && $user->login_token !== null) {
+            throw ValidationException::withMessages([
+                'name' => 'Akun ini sedang aktif di perangkat lain. Silakan Logout dari perangkat tersebut terlebih dahulu.',
+            ]);
+        }
+        // ========================================================
 
         // Login menggunakan 'name' dan mengecek apakah akun aktif
         if (!Auth::attempt([
