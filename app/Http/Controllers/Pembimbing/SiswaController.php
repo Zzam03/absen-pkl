@@ -13,7 +13,7 @@ class SiswaController extends Controller
         $user = auth()->user();
 
         $query = Placement::with(['student', 'location', 'score'])
-            ->where('status', 'active');
+            ->whereIn('status', ['active', 'finished']);
 
         if ($user->role === 'pembimbing_sekolah') {
             $query->whereHas('student', function ($q) use ($user) {
@@ -44,7 +44,7 @@ class SiswaController extends Controller
         $placement->load(['student', 'location']);
 
         abort_unless(
-            $placement->status === 'active' &&
+            in_array($placement->status, ['active', 'finished'], true) &&
             $placement->student &&
             $placement->student->role === 'student',
             404

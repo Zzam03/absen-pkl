@@ -51,7 +51,7 @@ class DatabaseSeeder extends Seeder
                 'password' => Hash::make('password123'),
                 'role' => 'pembimbing_sekolah',
                 'phone' => '081200000002',
-                'school_name' => 'SMK Negeri 1 Bandung', 
+                'school_name' => 'SMK Negeri 1 Bandung',
                 'is_active' => true,
             ]
         );

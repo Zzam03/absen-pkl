@@ -33,7 +33,7 @@ class JurnalController extends Controller
             'photo'    => 'nullable|image|max:4096',
         ]);
 
-        $placement = auth()->user()->currentPlacement();
+        $placement = auth()->user()->activePlacement()->first();
         if (! $placement) {
             return back()->with('error', 'Kamu belum punya penempatan PKL yang aktif.');
         }

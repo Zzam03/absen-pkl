@@ -10,31 +10,44 @@ class ProfileTest extends TestCase
 {
     use RefreshDatabase;
 
+    private function createUserWithDeviceLock(): User
+    {
+        return User::factory()->create([
+            'login_token' => 'test-device-token',
+        ]);
+    }
+
     public function test_profile_page_is_displayed(): void
     {
-        $user = User::factory()->create();
+        $user = $this->createUserWithDeviceLock();
 
         $response = $this
             ->actingAs($user)
-            ->get('/profile');
+            ->withSession([
+                'device_token' => $user->login_token,
+            ])
+            ->get('/profil');
 
         $response->assertOk();
     }
 
     public function test_profile_information_can_be_updated(): void
     {
-        $user = User::factory()->create();
+        $user = $this->createUserWithDeviceLock();
 
         $response = $this
             ->actingAs($user)
-            ->patch('/profile', [
+            ->withSession([
+                'device_token' => $user->login_token,
+            ])
+            ->patch('/profil', [
                 'name' => 'Test User',
                 'email' => 'test@example.com',
             ]);
 
         $response
             ->assertSessionHasNoErrors()
-            ->assertRedirect('/profile');
+            ->assertRedirect('/profil');
 
         $user->refresh();
 
@@ -45,29 +58,35 @@ class ProfileTest extends TestCase
 
     public function test_email_verification_status_is_unchanged_when_the_email_address_is_unchanged(): void
     {
-        $user = User::factory()->create();
+        $user = $this->createUserWithDeviceLock();
 
         $response = $this
             ->actingAs($user)
-            ->patch('/profile', [
+            ->withSession([
+                'device_token' => $user->login_token,
+            ])
+            ->patch('/profil', [
                 'name' => 'Test User',
                 'email' => $user->email,
             ]);
 
         $response
             ->assertSessionHasNoErrors()
-            ->assertRedirect('/profile');
+            ->assertRedirect('/profil');
 
         $this->assertNotNull($user->refresh()->email_verified_at);
     }
 
     public function test_user_can_delete_their_account(): void
     {
-        $user = User::factory()->create();
+        $user = $this->createUserWithDeviceLock();
 
         $response = $this
             ->actingAs($user)
-            ->delete('/profile', [
+            ->withSession([
+                'device_token' => $user->login_token,
+            ])
+            ->delete('/profil', [
                 'password' => 'password',
             ]);
 
@@ -81,18 +100,21 @@ class ProfileTest extends TestCase
 
     public function test_correct_password_must_be_provided_to_delete_account(): void
     {
-        $user = User::factory()->create();
+        $user = $this->createUserWithDeviceLock();
 
         $response = $this
             ->actingAs($user)
-            ->from('/profile')
-            ->delete('/profile', [
+            ->withSession([
+                'device_token' => $user->login_token,
+            ])
+            ->from('/profil')
+            ->delete('/profil', [
                 'password' => 'wrong-password',
             ]);
 
         $response
             ->assertSessionHasErrorsIn('userDeletion', 'password')
-            ->assertRedirect('/profile');
+            ->assertRedirect('/profil');
 
         $this->assertNotNull($user->fresh());
     }

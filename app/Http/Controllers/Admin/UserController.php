@@ -81,7 +81,7 @@ class UserController extends Controller
             'password' => ['required', 'min:8'],
             'school_name' => ['required', 'string', 'max:100'],
             'phone' => ['nullable', 'string', 'max:20'],
-            
+
             // Validasi Penempatan
             'location_id' => ['required', 'exists:locations,id'],
             'pembimbing_id' => ['required', 'exists:users,id'],

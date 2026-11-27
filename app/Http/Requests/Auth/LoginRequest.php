@@ -43,7 +43,7 @@ class LoginRequest extends FormRequest
             'password' => $this->input('password'),
             'is_active' => true,
         ], $this->boolean('remember'))) {
-            
+
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([

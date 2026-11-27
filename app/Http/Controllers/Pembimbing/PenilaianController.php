@@ -39,6 +39,18 @@ class PenilaianController extends Controller
     {
         $this->cek($placement);
 
+        if ($placement->status !== 'finished') {
+            return redirect()
+                ->route('pembimbing.siswa.show', $placement)
+                ->with('error', 'Penilaian hanya dapat dilakukan setelah status PKL diubah menjadi selesai oleh admin.');
+        }
+
+        if ($placement->score()->exists()) {
+            return redirect()
+                ->route('pembimbing.siswa.show', $placement)
+                ->with('info', 'Nilai siswa sudah diterbitkan dan tidak perlu dinilai ulang.');
+        }
+
         $placement->load('student');
 
         $score = $placement->score;
@@ -60,6 +72,18 @@ class PenilaianController extends Controller
     public function store(Request $request, Placement $placement)
     {
         $this->cek($placement);
+
+        if ($placement->status !== 'finished') {
+            return redirect()
+                ->route('pembimbing.siswa.show', $placement)
+                ->with('error', 'Penilaian hanya dapat disimpan setelah status PKL selesai.');
+        }
+
+        if ($placement->score()->exists()) {
+            return redirect()
+                ->route('pembimbing.siswa.show', $placement)
+                ->with('info', 'Nilai siswa sudah diterbitkan dan tidak dapat ditimpa.');
+        }
 
         $data = $request->validate([
             'discipline_score' => 'required|integer|between:0,100',
