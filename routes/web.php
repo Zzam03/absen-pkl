@@ -24,6 +24,7 @@ use App\Models\Placement;
 use App\Models\Attendance;
 use App\Models\Journal;
 use App\Models\Schedule;
+use Illuminate\Support\Facades\DB; // TAMBAHAN UNTUK DB
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -75,8 +76,14 @@ Route::middleware(['auth', 'devicelock'])->group(function () {
                 ->where('status', 'hadir')
                 ->count();
 
+            // ========================================================
+            // PERBAIKAN ERROR MONTH (SQLite vs MySQL)
+            // ========================================================
+            $driver = DB::connection()->getDriverName();
+            $monthFunc = $driver === 'sqlite' ? "strftime('%m', date)" : "MONTH(date)";
+
             $grafikKehadiran = Attendance::selectRaw(
-                'MONTH(date) as month, COUNT(*) as total'
+                "$monthFunc as month, COUNT(*) as total"
             )
                 ->whereIn('placement_id', $placementIds)
                 ->where('status', 'hadir')
@@ -84,6 +91,7 @@ Route::middleware(['auth', 'devicelock'])->group(function () {
                 ->groupBy('month')
                 ->orderBy('month')
                 ->get();
+            // ========================================================
 
             $jurnalStatus = Journal::selectRaw('status, COUNT(*) as total')
                 ->whereIn('placement_id', $placementIds)
@@ -173,7 +181,7 @@ Route::middleware(['auth', 'devicelock'])->group(function () {
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
         Route::resource('users', UserController::class)->except(['show']);
         Route::post('/users/store-with-placement', [UserController::class, 'storeWithPlacement'])
-    ->name('users.storeWithPlacement');
+            ->name('users.storeWithPlacement');
         Route::resource('locations', LocationController::class)->except(['show']);
         Route::resource('placements', PlacementController::class)->except(['show']);
 
